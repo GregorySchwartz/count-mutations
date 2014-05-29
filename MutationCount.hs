@@ -50,7 +50,7 @@ printMutCounts :: String
 printMutCounts label mutType bias codonMut mutCount mutationMap mutTypeMap =
         header ++ body
   where
-    header           = "label,position,count,count_weight\n"
+    header           = "label,position,count,weight\n"
     body             = unlines
                      . map mapLine
                      . M.toAscList
