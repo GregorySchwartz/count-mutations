@@ -32,6 +32,7 @@ data Options = Options { inputMutType  :: MutationType
                        , inputBias     :: Bias
                        , inputCodonMut :: CodonMut
                        , inputMutCount :: MutCount
+                       , inputLabel    :: String
                        , removeN       :: Bool
                        , input         :: String
                        , inputFasta    :: String
@@ -68,6 +69,12 @@ options = Options
          <> value 1
          <> help "Only count a unique mutation if it appears this many\
                  \ or more times" )
+      <*> strOption
+          ( long "input-label"
+         <> short 'l'
+         <> metavar "[diversity]|STRING"
+         <> value "diversity"
+         <> help "The label for the data (usually the dataset)" )
       <*> switch
           ( long "remove-N"
          <> short 'N'
@@ -107,6 +114,7 @@ mutationCounts opts = do
     let bias     = inputBias opts
     let codonMut = inputCodonMut opts
     let mutCount = inputMutCount opts
+    let label    = inputLabel opts
 
     -- Get rid of carriages
     let contentsNoCarriages  = filter (/= '\r') $ contents
@@ -128,8 +136,13 @@ mutationCounts opts = do
                               cloneMutMap
 
     -- Save the counts
-    writeFile (output opts) $ printMutCounts
-        mutType bias codonMut mutCount combinedCloneMutMap positionCloneMap
+    writeFile (output opts) $ printMutCounts label
+                                             mutType
+                                             bias
+                                             codonMut
+                                             mutCount
+                                             combinedCloneMutMap
+                                             positionCloneMap
 
 main :: IO ()
 main = execParser opts >>= mutationCounts

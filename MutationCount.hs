@@ -39,22 +39,25 @@ generatePositionCloneMap = joinSilentMutations
     realCodon           = filterMutStab (\_ -> True)
 
 -- Return the results of the mutation or stable counts as a string
-printMutCounts :: MutationType
-                     -> Bias
-                     -> CodonMut
-                     -> MutCount
-                     -> MutationMap
-                     -> PositionCloneMap
-                     -> String
-printMutCounts mutType bias codonMut mutCount mutationMap mutTypeMap =
+printMutCounts :: String
+               -> MutationType
+               -> Bias
+               -> CodonMut
+               -> MutCount
+               -> MutationMap
+               -> PositionCloneMap
+               -> String
+printMutCounts label mutType bias codonMut mutCount mutationMap mutTypeMap =
         header ++ body
   where
-    header           = "position,count,count_weight\n"
+    header           = "label,position,count,count_weight\n"
     body             = unlines
                      . map mapLine
                      . M.toAscList
                      $ mutationMap
-    mapLine (x, xs) = show x
+    mapLine (x, xs) = label
+                   ++ ","
+                   ++ show x
                    ++ ","
                    ++ (show . trueMutCount x $ mutTypeMap)
                    ++ ","
