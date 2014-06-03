@@ -72,8 +72,8 @@ options = Options
       <*> strOption
           ( long "input-label"
          <> short 'l'
-         <> metavar "[diversity]|STRING"
-         <> value "diversity"
+         <> metavar "[count]|STRING"
+         <> value "count"
          <> help "The label for the data (usually the dataset)" )
       <*> switch
           ( long "remove-N"

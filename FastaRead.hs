@@ -72,7 +72,6 @@ generateCloneMap = M.fromList . map getCodonSplit . getSequences
     assocMap (x, y)                = ((x, germline y), clones y)
     germlineSplit                  = zip [0..]
                                    . filter (\x -> elem '>' x)
-                                   . filter (/= "")
                                    . Split.splitOn ">>"
     germline                       = take 2 . lines
     clones                         = drop 2 . lines

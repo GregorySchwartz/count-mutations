@@ -19,7 +19,7 @@ import Mutation
 
 -- Join together mutation lists into a MutationMap
 joinMutations :: [[(Position, Mutation)]] -> MutationMap
-joinMutations = M.map nub . groupedMutations
+joinMutations = groupedMutations
   where
     groupedMutations = M.fromListWith (++) . map (\(x, y) -> (x, [y])) . concat
 
@@ -29,7 +29,7 @@ generateCloneMutMap = M.mapWithKey gatherMutations
   where
     gatherMutations k xs = joinMutations . map (countMutations (snd k)) $ xs
 
--- Generat the position to clone map that is separated by clones
+-- Generate the position to clone map that is separated by clones
 generatePositionCloneMap :: CloneMutMap -> PositionCloneMap
 generatePositionCloneMap = joinSilentMutations
                          . M.map (M.map (wrapClone . realCodon))

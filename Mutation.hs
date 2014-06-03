@@ -92,14 +92,13 @@ uniqueSynonymous :: MutationType
                  -> [[Mutation]]
                  -> Int
 uniqueSynonymous mutType bias codonMut mutCount = sum
-                                                . map (length
+                                                . map ( length
                                                       . getMutationCount)
   where
-    getMutationCount   = nub
+    getMutationCount   = nub -- Unique mutations
                        . mutCountFrequent
                        . filter (\(_, _, sil) -> biasValue mutType sil)
-                       . concat
-                       . map (mutBias . fromJust)
+                       . concatMap (mutBias . fromJust)
                        . filter isJust
                        . map (mutatedCodon codonMut)  -- Only codons with n muts
                        . map mutation
@@ -134,8 +133,8 @@ uniqueSynonymous mutType bias codonMut mutCount = sum
 -- Return the mutations if they exist between the germline and a clone
 -- (unused in this algorithm, only here for completionist reasons).
 countMutations :: Germline
-               ->   Clone
-               ->   [(Position, Mutation)]
+               -> Clone
+               -> [(Position, Mutation)]
 countMutations germline clone = mut germline clone
   where
     mut x y         = zip [1..] . zip x $ y
