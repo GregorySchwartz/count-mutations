@@ -35,15 +35,14 @@ isSilentMutation (x, y)
 -- Takes a list of mutations and returns the mutations that are
 -- actual mutations (the mutation is not just the same character with no gaps.
 filterMutStab :: (Mutation -> Bool)
-              ->   [Mutation]
-              ->   [Mutation]
+              -> [Mutation]
+              -> [Mutation]
 filterMutStab isWhat = filter filterRules
   where
     filterRules x    = isWhat x
-                    &&   not (inTuple '-' x)
-                    &&   not (inTuple '.' x)
-                    &&   not (inTuple '~' x)
-                    &&   not (inTuple 'N' x)
+                    && not (inTuple '-' x)
+                    && not (inTuple '.' x)
+                    && not (inTuple '~' x)
     inTuple c (x, y) = if c `elem` x || c `elem` y then True else False
 
 -- Return the mutation steps for a mutation
@@ -70,8 +69,8 @@ mutSteps (n:ns) x y = (n , y !! n, isSilentMutation (x, changeXToY n x y))
 
 -- | Change one nucleotide from xs to ys at position (n - 1) (index at 0)
 changeXToY :: Position -> String -> String -> String
-changeXToY 0 (x:xs) (y:ys) = y:xs
-changeXToY n (x:xs) (y:ys) = x : changeXToY (n - 1) xs ys
+changeXToY 0 (_:xs) (y:_) = y:xs
+changeXToY n (x:xs) (_:ys) = x : changeXToY (n - 1) xs ys
 
 -- | Determine which positions are mutated in a codon
 mutPos :: String -> String -> Position -> [Position] -> [Position]
