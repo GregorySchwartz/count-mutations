@@ -53,7 +53,7 @@ executable count-mutations
   -- other-modules:       
   
   -- Other library packages from which modules are imported.
-  build-depends:       base >=4.5, split >=0.2, containers >=0.4, optparse-applicative >=0.7
+  build-depends:       base ==4.6.*, split ==0.2.*, containers ==0.5.*, optparse-applicative ==0.10.*
   
   -- Directories containing source files.
   hs-source-dirs:      src

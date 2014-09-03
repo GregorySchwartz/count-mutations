@@ -42,27 +42,27 @@ data Options = Options { inputMutType  :: MutationType
 -- | Command line options
 options :: Parser Options
 options = Options
-      <$> option
+      <$> option auto
           ( long "input-mut-type"
          <> short 't'
          <> metavar "[Silent]|Replacement"
          <> value Silent
          <> help "The type of mutation to be counted" )
-      <*> option
+      <*> option auto
           ( long "input-bias"
          <> short 'b'
          <> metavar "[Silent]|Replacement"
          <> value Silent
          <> help "The type of mutation to bias for when calculating\
                  \ intermediate codons" )
-      <*> option
+      <*> option auto
           ( long "input-codon-mut"
          <> short 'c'
          <> metavar "[0]|1|2|3"
          <> value 0
          <> help "Only count mutations from codons with this many mutations\
                  \ (0 is the same as include all codons)" )
-      <*> option
+      <*> option auto
           ( long "input-mut-count"
          <> short 'm'
          <> metavar "[1]|2|3|..."
