@@ -1,4 +1,3 @@
--- germline_clone_mutation_count_source
 -- MutationCount Module
 -- By G.W. Schwartz
 
@@ -42,13 +41,20 @@ generatePositionCloneMap = joinSilentMutations
 printMutCounts :: String
                -> MutationType
                -> Bias
+               -> Bool
                -> CodonMut
                -> MutCount
                -> MutationMap
                -> PositionCloneMap
                -> String
-printMutCounts label mutType bias codonMut mutCount mutationMap mutTypeMap =
-        header ++ body
+printMutCounts label
+               mutType
+               bias
+               fourBool
+               codonMut
+               mutCount
+               mutationMap
+               mutTypeMap = header ++ body
   where
     header           = "label,position,count,weight\n"
     body             = unlines
@@ -62,6 +68,6 @@ printMutCounts label mutType bias codonMut mutCount mutationMap mutTypeMap =
                    ++ (show . trueMutCount x $ mutTypeMap)
                    ++ ","
                    ++ (show . length . filterMutStab (\_ -> True) $ xs)
-    trueMutCount p  = uniqueSynonymous mutType bias codonMut mutCount
+    trueMutCount p  = uniqueSynonymous mutType bias fourBool codonMut mutCount
                     . fromMaybe [[]]
                     . M.lookup p

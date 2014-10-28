@@ -34,6 +34,7 @@ data Options = Options { inputMutType  :: MutationType
                        , inputMutCount :: MutCount
                        , inputLabel    :: String
                        , removeN       :: Bool
+                       , onlyFourFold  :: Bool
                        , input         :: String
                        , inputFasta    :: String
                        , output        :: String
@@ -79,6 +80,11 @@ options = Options
           ( long "remove-N"
          <> short 'N'
          <> help "Whether to remove N or n in the sequence" )
+      <*> switch
+          ( long "four-fold-redundant"
+         <> short 'f'
+         <> help "Whether to only count mutations if they are\
+                 \ four fold redundant mutations" )
       <*> strOption
           ( long "input"
          <> short 'I'
@@ -130,15 +136,16 @@ mutationCounts opts = do
     let positionCloneMap   = generatePositionCloneMap cloneMutMap
 
     -- Generate the position to clone map
-    let combinedCloneMutMap = M.unionsWith (++) .
-                              map snd           .
-                              M.toAscList       $
-                              cloneMutMap
+    let combinedCloneMutMap = M.unionsWith (++)
+                            . map snd
+                            . M.toAscList
+                            $ cloneMutMap
 
     -- Save the counts
     writeFile (output opts) $ printMutCounts label
                                              mutType
                                              bias
+                                             (onlyFourFold opts)
                                              codonMut
                                              mutCount
                                              combinedCloneMutMap

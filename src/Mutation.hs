@@ -15,6 +15,23 @@ import Data.Maybe
 import Types
 import Translation
 
+-- Checks if a codon is four fold redundant (redundant in 3rd position for all
+-- nucleotides)
+isFourFoldRedundantCodon :: String -> Bool
+isFourFoldRedundantCodon = flip elem $ [ "CTT", "CTC", "CTA", "CTG"
+                                       , "GTT", "GTC", "GTA", "GTG"
+                                       , "TCT", "TCC", "TCA", "TCG"
+                                       , "CCT", "CCC", "CCA", "CCG"
+                                       , "ACT", "ACC", "ACA", "ACG"
+                                       , "GCT", "GCC", "GCA", "GCG"
+                                       , "CGT", "CGC", "CGA", "CGG"
+                                       , "GGT", "GGC", "GGA", "GGG" ]
+
+-- Checks if a Mutation is four fold redundant
+isFourFoldRedundantMutation :: Mutation -> Bool
+isFourFoldRedundantMutation (x, y) = isFourFoldRedundantCodon x
+                                  && isFourFoldRedundantCodon y
+
 -- Takes two strings, returns Hamming distance
 hamming :: String -> String -> Int
 hamming xs ys = length $ filter not $ zipWith (==) xs ys
@@ -46,7 +63,7 @@ filterMutStab isWhat = filter filterRules
     inTuple c (x, y) = if c `elem` x || c `elem` y then True else False
 
 -- Return the mutation steps for a mutation
-mutation :: Mutation -> Maybe [[(Position, Nucleotide, Bool)]]
+mutation :: Mutation -> Maybe [[(Position, Nucleotide, Bool, Bool)]]
 mutation (x, y)
     | hamming x y == 0 = Nothing
     | hamming x y == 2 = Just [ mutSteps (mutPos x y 0 []) x y
@@ -62,10 +79,15 @@ mutation (x, y)
 -- | A spanning fold that collects the mutation steps from germline to
 -- clone codon
 -- mutSteps (order of positions mutated) (germline codon) (clone codon)
-mutSteps :: [Position] -> Codon -> Codon -> [(Position, Nucleotide, Bool)]
+mutSteps :: [Position] -> Codon -> Codon -> [(Position, Nucleotide, Bool, Bool)]
 mutSteps [] _ _     = []
-mutSteps (n:ns) x y = (n , y !! n, isSilentMutation (x, changeXToY n x y))
+mutSteps (n:ns) x y = ( n
+                      , y !! n
+                      , isSilentMutation intermediateMutation
+                      , isFourFoldRedundantMutation intermediateMutation )
                     : mutSteps ns (changeXToY n x y) y
+  where
+    intermediateMutation = (x, changeXToY n x y)
 
 -- | Change one nucleotide from xs to ys at position (n - 1) (index at 0)
 changeXToY :: Position -> String -> String -> String
@@ -86,17 +108,19 @@ mutPos (x:xs) (y:ys) n ns
 -- intermediate steps from the germline.
 uniqueSynonymous :: MutationType
                  -> Bias
+                 -> Bool
                  -> CodonMut
                  -> MutCount
                  -> [[Mutation]]
                  -> Int
-uniqueSynonymous mutType bias codonMut mutCount = sum
-                                                . map ( length
-                                                      . getMutationCount)
+uniqueSynonymous mutType bias fourBool codonMut mutCount = sum
+                                                         . map ( length
+                                                         . getMutationCount )
   where
     getMutationCount   = nub -- Unique mutations
                        . mutCountFrequent
-                       . filter (\(_, _, sil) -> biasValue mutType sil)
+                       . filter (\(_, _, sil, four) -> biasValue mutType sil
+                                                    && isFourFold fourBool four)
                        . concatMap (mutBias . fromJust)
                        . filter isJust
                        . map (mutatedCodon codonMut)  -- Only codons with n muts
@@ -113,10 +137,12 @@ uniqueSynonymous mutType bias codonMut mutCount = sum
     biasIndex Replacement Silent      = minimum . map sumMut
     biasIndex Replacement Replacement = maximum . map sumMut
     sumMut          = sum
-                    . map ( \(_, _, sil)
+                    . map ( \(_, _, sil, _)
                          -> if ((biasValue mutType) sil) then 1 else 0 )
-    biasValue Silent      = id
-    biasValue Replacement = not
+    biasValue Silent       = id
+    biasValue Replacement  = not
+    isFourFold True x      = x  -- Check four fold redundancy
+    isFourFold False _     = True  -- Include it all if we don't care about it
     mutatedCodon 0 xs      = xs
     mutatedCodon _ Nothing = Nothing
     mutatedCodon 1 (Just xs)
