@@ -10,27 +10,32 @@ module Mutation where
 -- Built in
 import Data.List
 import Data.Maybe
+import Control.Applicative
 
 -- Local
 import Types
 import Translation
 
--- Checks if a codon is four fold redundant (redundant in 3rd position for all
--- nucleotides)
-isFourFoldRedundantCodon :: String -> Bool
-isFourFoldRedundantCodon = flip elem $ [ "CTT", "CTC", "CTA", "CTG"
-                                       , "GTT", "GTC", "GTA", "GTG"
-                                       , "TCT", "TCC", "TCA", "TCG"
-                                       , "CCT", "CCC", "CCA", "CCG"
-                                       , "ACT", "ACC", "ACA", "ACG"
-                                       , "GCT", "GCC", "GCA", "GCG"
-                                       , "CGT", "CGC", "CGA", "CGG"
-                                       , "GGT", "GGC", "GGA", "GGG" ]
-
 -- Checks if a Mutation is four fold redundant
 isFourFoldRedundantMutation :: Mutation -> Bool
-isFourFoldRedundantMutation (x, y) = isFourFoldRedundantCodon x
-                                  && isFourFoldRedundantCodon y
+isFourFoldRedundantMutation x = elem x (mutList list1)
+                             || elem x (mutList list2)
+                             || elem x (mutList list3)
+                             || elem x (mutList list4)
+                             || elem x (mutList list5)
+                             || elem x (mutList list6)
+                             || elem x (mutList list7)
+                             || elem x (mutList list8)
+  where
+    list1 = ["CTT", "CTC", "CTA", "CTG"]
+    list2 = ["GTT", "GTC", "GTA", "GTG"]
+    list3 = ["TCT", "TCC", "TCA", "TCG"]
+    list4 = ["CCT", "CCC", "CCA", "CCG"]
+    list5 = ["ACT", "ACC", "ACA", "ACG"]
+    list6 = ["GCT", "GCC", "GCA", "GCG"]
+    list7 = ["CGT", "CGC", "CGA", "CGG"]
+    list8 = ["GGT", "GGC", "GGA", "GGG"]
+    mutList a = filter (\(i, j) -> i /= j) $ (,) <$> a <*> a
 
 -- Takes two strings, returns Hamming distance
 hamming :: String -> String -> Int
