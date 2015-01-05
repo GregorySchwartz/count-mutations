@@ -10,7 +10,7 @@ name:                count-mutations
 -- PVP summary:      +-+------- breaking API changes
 --                   | | +----- non-breaking API additions
 --                   | | | +--- code changes with no API change
-version:             0.2.0.1
+version:             0.3.0.0
 
 -- A short (one-line) description of the package.
 synopsis:            Takes a fasta file in the format of ">>Germline header\nGermline sequence\n>Mutant header\nMutant sequence...etc" and generates the mutation counts of the clones from each listed germline in the file per position in a dataframe type format

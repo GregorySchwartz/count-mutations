@@ -91,7 +91,7 @@ options = Options
          <> metavar "STRING STRING"
          <> value ""
          <> help "Two sequences separated by spaces in order to find\
-                 \ the muations between them" )
+                 \ the mutations between them" )
       <*> strOption
           ( long "input-fasta"
          <> short 'i'
@@ -105,51 +105,59 @@ options = Options
          <> value ""
          <> help "The name of the output file with the counts" )
 
+-- | Get the input file in the correct format
 getInput :: Options -> IO String
 getInput opts = do
-    if (inputFasta opts /= "")
+    if (not . null . inputFasta $ opts)
         then readFile . inputFasta $ opts
-        else return (">>SEQ1\n" ++ head seqs ++ "\n>SEQ2\n" ++ last seqs)
+        else
+            if (not . null . input $ opts)
+                then return (">>SEQ1\n" ++ head seqs ++ "\n>SEQ2\n" ++ last seqs)
+                else getContents
   where
     seqs = words . input $ opts
 
 mutationCounts :: Options -> IO ()
 mutationCounts opts = do
-    contents    <- getInput opts
+    contents     <- getInput opts
     let mutType  = inputMutType opts
-    let bias     = inputBias opts
-    let codonMut = inputCodonMut opts
-    let mutCount = inputMutCount opts
-    let label    = inputLabel opts
+        bias     = inputBias opts
+        codonMut = inputCodonMut opts
+        mutCount = inputMutCount opts
+        label    = inputLabel opts
 
     -- Get rid of carriages
-    let contentsNoCarriages  = filter (/= '\r') $ contents
+        contentsNoCarriages  = filter (/= '\r') $ contents
     -- No newlines in sequence
-    let contentsNoNewlines  = joinSeq (removeN opts) contentsNoCarriages
+        contentsNoNewlines  = joinSeq (removeN opts) contentsNoCarriages
 
-    let cloneMap  = generateCloneMap contentsNoNewlines
+        cloneMap  = generateCloneMap contentsNoNewlines
 
     -- Generate the germline to clone map
-    let cloneMutMap         = generateCloneMutMap cloneMap
+        cloneMutMap         = generateCloneMutMap cloneMap
 
     -- Generate the germline to clone map separated by clones
-    let positionCloneMap   = generatePositionCloneMap cloneMutMap
+        positionCloneMap   = generatePositionCloneMap cloneMutMap
 
     -- Generate the position to clone map
-    let combinedCloneMutMap = M.unionsWith (++)
+        combinedCloneMutMap = M.unionsWith (++)
                             . map snd
                             . M.toAscList
                             $ cloneMutMap
+    -- Get the string to save
+        outputData          = printMutCounts label
+                                            mutType
+                                            bias
+                                            (onlyFourFold opts)
+                                            codonMut
+                                            mutCount
+                                            combinedCloneMutMap
+                                            positionCloneMap
 
     -- Save the counts
-    writeFile (output opts) $ printMutCounts label
-                                             mutType
-                                             bias
-                                             (onlyFourFold opts)
-                                             codonMut
-                                             mutCount
-                                             combinedCloneMutMap
-                                             positionCloneMap
+    if (null . output $ opts)
+        then putStrLn outputData
+        else writeFile (output opts) outputData
 
 main :: IO ()
 main = execParser opts >>= mutationCounts
