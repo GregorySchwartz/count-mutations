@@ -21,9 +21,10 @@ count-mutations, Gregory W. Schwartz
 Usage: count-mutations [-t|--input-mut-type [Silent]|Replacement]
                        [-b|--input-bias [Silent]|Replacement]
                        [-c|--input-codon-mut [0]|1|2|3]
-                       [-m|--input-mut-count [1]|2|3|...] [-N|--remove-N]
-                       [-I|--input STRING STRING] [-i|--input-fasta FILE]
-                       [-o|--output FILE]
+                       [-m|--input-mut-count [1]|2|3|...]
+                       [-l|--input-label [count]|STRING] [-N|--remove-N]
+                       [-f|--four-fold-redundant] [-I|--input STRING STRING]
+                       [-i|--input-fasta FILE] [-o|--output FILE]
   Return the mutation counts with certain biases from the germline to the
   mutants within clones
 
@@ -40,9 +41,13 @@ Available options:
   -m,--input-mut-count [1]|2|3|...
                            Only count a unique mutation if it appears this many
                            or more times
+  -l,--input-label [count]|STRING
+                           The label for the data (usually the dataset)
   -N,--remove-N            Whether to remove N or n in the sequence
+  -f,--four-fold-redundant Whether to only count mutations if they are four fold
+                           redundant mutations
   -I,--input STRING STRING Two sequences separated by spaces in order to find
-                           the muations between them
+                           the mutations between them
   -i,--input-fasta FILE    The name of the input fasta file
   -o,--output FILE         The name of the output file with the counts
 ```
